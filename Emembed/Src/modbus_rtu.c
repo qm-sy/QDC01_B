@@ -57,8 +57,9 @@ void Modbus_Event( void )
     }
 }
 
+
 /**
- * @brief	读输出寄存器  03
+ * @brief	读输入寄存器  03
  *
  * @param   void
  *
@@ -68,75 +69,12 @@ void Modbus_Fun3( void )
 {
     uint16_t i;
 
-    modbus.send_value_addr  = 3;                 //DATA1 H 位置
-    modbus.byte_cnt   = (rs485.RX4_buf[4]<<8 | rs485.RX4_buf[5]) *2;
-    modbus.start_addr = rs485.RX4_buf[2]<<8 | rs485.RX4_buf[3];
-
-    rs485.TX4_buf[0]  = MY_ADDR;                //Addr
-    rs485.TX4_buf[1]  = 0x03;                   //Fun
-    rs485.TX4_buf[2]  = modbus.byte_cnt;        //Byte Count
-
-    for( i = modbus.start_addr; i < modbus.start_addr + modbus.byte_cnt/2; i++ )
-    {
-        /*    每次循环前初始化byte_info                       */
-        modbus.byte_info_H = modbus.byte_info_L = 0X00;
-        switch (i)
-        {
-            /*  30001  NTC1、NTC2温度查询                           */
-            case 0x00:
-                modbus.byte_info_L = get_temp(NTC_1);
-                modbus.byte_info_H = get_temp(NTC_2);   
-
-                break;
-
-            /*  30002  NTC3、NTC4温度查询                */
-            case 0x01:
-                modbus.byte_info_H = get_temp(NTC_4);    
-                modbus.byte_info_L = get_temp(NTC_3);
-
-                break;
-
-            /*  30003 环境温湿度查询                   */
-            case 0x02:
-                modbus.byte_info_H = 0x41;           
-                modbus.byte_info_L = 0x19;          
-
-                break;
-
-            /*  30004 Signal_IN状态查询                   */
-            case 0x03:
-                modbus.byte_info_H = 0x00;           
-                modbus.byte_info_L = ac_dc.signal_in_flag;          
-
-                break;
-                
-            default:
-                break;
-        }
-        rs485.TX4_buf[modbus.send_value_addr++] = modbus.byte_info_H;
-        rs485.TX4_buf[modbus.send_value_addr++] = modbus.byte_info_L;
-    }
-    slave_to_master(0x03,3 + modbus.byte_cnt);
-}
-
-
-/**
- * @brief	读输入寄存器  04
- *
- * @param   void
- *
- * @return  void 
-**/
-void Modbus_Fun4( void )
-{
-    uint16_t i;
-
     modbus.send_value_addr  = 3;                //DATA1 H 位置
     modbus.byte_cnt   = (rs485.RX4_buf[4]<<8 | rs485.RX4_buf[5]) *2;
     modbus.start_addr = rs485.RX4_buf[2]<<8 | rs485.RX4_buf[3];
 
     rs485.TX4_buf[0]  = MY_ADDR;                //Addr
-    rs485.TX4_buf[1]  = 0x04;                   //Fun
+    rs485.TX4_buf[1]  = 0x03;                   //Fun
     rs485.TX4_buf[2]  = modbus.byte_cnt;        //Byte Count
 
     for( i = modbus.start_addr; i < modbus.start_addr + modbus.byte_cnt/2; i++ )
@@ -185,6 +123,68 @@ void Modbus_Fun4( void )
                 modbus.byte_info_H = 0X00;                    
 
                 break;
+            default:
+                break;
+        }
+        rs485.TX4_buf[modbus.send_value_addr++] = modbus.byte_info_H;
+        rs485.TX4_buf[modbus.send_value_addr++] = modbus.byte_info_L;
+    }
+    slave_to_master(0x03,3 + modbus.byte_cnt);
+}
+
+/**
+ * @brief	读输出寄存器  04
+ *
+ * @param   void
+ *
+ * @return  void 
+**/
+void Modbus_Fun4( void )
+{
+    uint16_t i;
+
+    modbus.send_value_addr  = 3;                 //DATA1 H 位置
+    modbus.byte_cnt   = (rs485.RX4_buf[4]<<8 | rs485.RX4_buf[5]) *2;
+    modbus.start_addr = rs485.RX4_buf[2]<<8 | rs485.RX4_buf[3];
+
+    rs485.TX4_buf[0]  = MY_ADDR;                //Addr
+    rs485.TX4_buf[1]  = 0x04;                   //Fun
+    rs485.TX4_buf[2]  = modbus.byte_cnt;        //Byte Count
+
+    for( i = modbus.start_addr; i < modbus.start_addr + modbus.byte_cnt/2; i++ )
+    {
+        /*    每次循环前初始化byte_info                       */
+        modbus.byte_info_H = modbus.byte_info_L = 0X00;
+        switch (i)
+        {
+            /*  30001  NTC1、NTC2温度查询                           */
+            case 0x00:
+                modbus.byte_info_L = get_temp(NTC_1);
+                modbus.byte_info_H = get_temp(NTC_2);   
+
+                break;
+
+            /*  30002  NTC3、NTC4温度查询                */
+            case 0x01:
+                modbus.byte_info_H = get_temp(NTC_4);    
+                modbus.byte_info_L = get_temp(NTC_3);
+
+                break;
+
+            /*  30003 环境温湿度查询                   */
+            case 0x02:
+                modbus.byte_info_H = 0x41;           
+                modbus.byte_info_L = 0x19;          
+
+                break;
+
+            /*  30004 Signal_IN状态查询                   */
+            case 0x03:
+                modbus.byte_info_H = 0x00;           
+                modbus.byte_info_L = ac_dc.signal_in_flag;          
+
+                break;
+                
             default:
                 break;
         }
