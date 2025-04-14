@@ -17,30 +17,25 @@ void main( void )
     Uart4_Send_Statu_Init();
     Timer0_Init();
 
+    /*  PWM控制  */
+    PWM_Init();
+
     /*  4路220输出控制  */
     Power_Statu_Init();
     Timer3_Init();
-    //INT0_Init();
-    //Timer1_Init();
-    
-    /*  PWM控制  */
-    PWM_Init();
+    INT0_Init();
+    Timer1_Init();
 
     EA = 1;
 
     eeprom_statu_judge();
 
     printf("========== code start ========== \r\n");
-    //printf("========== code start ========== \r\n");
 
     while (1)
     {
         Modbus_Event();
-        // printf("cnt1: %d \r\n",(int)cnt1);
-        // printf("cnt2: %d \r\n",(int)cnt2);
-        //temp_scan();
-        //  DHT11_TEST();
-        // delay_ms(1000);
-        //slave_scan();
+        temp_scan();
+        sync_ctrl();  
     }  
 }

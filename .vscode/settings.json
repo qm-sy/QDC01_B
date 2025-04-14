@@ -13,6 +13,7 @@
         "tim.h": "c",
         "eeprom_crl.h": "c",
         "eeprom.h": "c",
-        "power_crl.h": "c"
+        "power_crl.h": "c",
+        "STDIO.H": "cpp"
     }
 }

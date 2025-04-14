@@ -28,10 +28,10 @@ void PWM_Init( void )
     // PWMB_CCR7  = 0x012C;        //设置PWM7占空比
     // PWMB_CCR8  = 0x012C;        //设置PWM8占空比
 
-    //PWMB_ENO  |= 0x50;          //使能 PWM7 & PWM8 输出
+    // PWMB_ENO  |= 0x50;          //使能 PWM7 & PWM8 输出
     PWMB_ENO  |= 0x10;
 
-    PWMB_BKR   = 0x80;          //使能主输出
+    // PWMB_BKR   = 0x80;          //使能主输出
     PWMB_CR1  |= 0x01;          //将CEN2位置1，开始计时        
 }
 

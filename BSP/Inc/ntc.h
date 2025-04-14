@@ -18,12 +18,10 @@ typedef struct
     uint8_t  temp_value3;  
     uint8_t  temp_alarm_value;
     uint8_t  temp_scan_flag;
-    uint8_t  temp_scan_allow_flag;
 }TEMP;
 
 extern TEMP temp;
 
 uint16_t get_temp( uint8_t channle_x );
-void temp_scan( void );
 
 #endif

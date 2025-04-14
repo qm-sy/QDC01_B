@@ -11,8 +11,15 @@ void Tim3_ISR( void ) interrupt 19
 {
 
     static uint16_t temp_scan_cnt = 0;
-    static uint16_t statu_scan_cnt = 0;
-    /* 1, 220V AC输出CH1~CH3固定最大功率输出           */
+
+    /* 1, Signal_IN状态查询           */
+    if( Signal_IN == 1 )
+    {
+        ac_dc.signal_in_flag = 1;
+    }else
+    {
+        ac_dc.signal_in_flag = 0;
+    }
 
     /* 2, temp 上报 1s/次                             */
     if( temp.temp_scan_flag == 0 )
@@ -22,17 +29,6 @@ void Tim3_ISR( void ) interrupt 19
         {
             temp.temp_scan_flag = 1;
             temp_scan_cnt = 0;
-        }
-    }
-
-    /* 3,  1s/次   发送statu                          */
-    if( rs485.send_scan_flag == 0)
-    {
-        statu_scan_cnt++;
-        if( statu_scan_cnt == 100 )
-        {
-            statu_scan_cnt = 0;
-            rs485.send_scan_flag = 1;
         }
     }
 }

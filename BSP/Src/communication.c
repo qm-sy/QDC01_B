@@ -21,7 +21,6 @@ void Uart4_Send_Statu_Init( void )
     rs485.RX4_rev_timeout = 0;
     rs485.RX4_rev_cnt = 0;
     DR_485 = 0;
-    rs485.send_scan_flag = 0;
 }
 
 /**
@@ -71,7 +70,7 @@ void Uart4_ISR() interrupt 18
             rs485.RX4_rev_cnt++;
         }
         /* 6, 重置接收完毕判断时间                              */
-        rs485.RX4_rev_timeout = 50;
+        rs485.RX4_rev_timeout = 5;
     }
 }
 
@@ -135,5 +134,3 @@ char putchar(char c)  // 串口重定向需要添加头文件stdio.h
     TX1_busy_Flag = 1;
     return c;
 }
-
-

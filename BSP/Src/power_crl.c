@@ -12,6 +12,7 @@ AC_DC ac_dc;
 void Power_Statu_Init( void )
 {
     ac_dc.zero_flag  = 0;
+    temp.temp_scan_flag = 0;
     AC_Out1 = AC_Out2 = AC_Out3 = 1;
 }
 
@@ -48,17 +49,30 @@ void Tim1_ISR( void ) interrupt 3   //10ms
     if( ac_dc.zero_flag == 1 )
     {
         ac_dc.zero_flag = 0;
-        AC_Out3 = 0;
 
-         /* 2, 设置下一次Timer1中断触发所需时间，即脉冲时间       */
+         /* 2, 温度允许，使能为1时可开启输出          */
+        if(( ac_dc.ac220_out1_enable == 1 ) && (ac_dc.ac220_out1_temp_allow == 1))
+        {
+            AC_Out1 = 0;
+        }
+        if(( ac_dc.ac220_out2_enable == 1 ) && (ac_dc.ac220_out2_temp_allow == 1))
+        {
+            AC_Out2 = 0;
+        }
+        if(( ac_dc.ac220_out3_enable == 1 ) && (ac_dc.ac220_out3_temp_allow == 1))
+        {
+            AC_Out3 = 0;
+        }
+
+         /* 3, 设置下一次Timer1中断触发所需时间，即脉冲时间       */
         TL1 = 0xF7;				
         TH1 = 0xFF;				
     }else
     {
-        /* 3, 下一次进入Timer1中断，power_ch电平 由低电平变为高电平，完成一次10us脉冲，即斩波*/
-        AC_Out3 = 1;
+        /* 2, 下一次进入Timer1中断，power_ch电平 由低电平变为高电平，完成一次10us脉冲，即斩波*/
+        AC_Out1 = AC_Out2 = AC_Out3 = 1;
 
-        /* 4, 定时器1停止计时，关闭TIM1中断，等待下一次外部中断     */
+        /* 3, 定时器1停止计时，关闭TIM1中断，等待下一次外部中断     */
         TR1 = 0;				    
         ET1 = 0; 
     }
@@ -94,10 +108,131 @@ void led_ctrl( uint8_t on_off )
     }
 }
 
+/**
+ * @brief	24V PWM风扇档位控制函数
+ *
+ * @param   level :风扇档位 0~6档
+ *
+ * @return  void
+**/
+void fan_ctrl( uint8_t level )
+{
+    PWMB_CCR7= level * 184;
+}
+
+/**
+ * @brief	同步控制函数：无外部信号时 PWM风扇和220V输出关闭
+ *
+ * @param   
+ *
+ * @return  void
+**/
 void sync_ctrl( void )
 {
-    if( ac_dc.sync_flag == 1 ) && ()
+    if( ac_dc.sync_flag == 1 )
     {
+        if( ac_dc.signal_in_flag == 1 )
+        {
+            PWMB_BKR = 0x80;    //PWM控制
+            EX0 = 1;            //外部中断控制
+        }else
+        {
+            PWMB_BKR = 0x00; 
+            EX0 = 0;
+        }
+    }else
+    {
+        PWMB_BKR = 0x80; 
+        EX0 = 1;
+    }
+}
 
+/**
+ * @brief	模式控制函数 
+ *
+ * @param   
+ *
+ * @return  void
+**/
+void mode_ctrl( uint8_t mode_num )
+{
+    switch (mode_num)
+    {
+        case 0x01:
+            ac_220v_crl(30);
+            fan_ctrl(3);
+
+            eeprom.ac220_level = 30;
+            eeprom.pwm_info = 3;
+            eeprom_data_record();
+
+            break;
+
+        case 0x02:
+            ac_220v_crl(50);
+            fan_ctrl(4);
+
+            eeprom.ac220_level = 50;
+            eeprom.pwm_info = 4;
+            eeprom_data_record();
+
+            break;
+
+        case 0x04:
+            ac_220v_crl(80);
+            fan_ctrl(6);
+
+            eeprom.ac220_level = 80;
+            eeprom.pwm_info = 6;
+            eeprom_data_record();
+
+            break;
+
+        default:
+            break;
+    }
+}
+
+/**
+ * @brief 温度扫描，1s/次 控制220V输出使能
+ *
+ * @param[in] 
+ * 
+ * @return  
+ * 
+**/
+void temp_scan( void )
+{
+    if( temp.temp_scan_flag == 1)
+    {
+        temp.temp_value1 =  get_temp(NTC_1);
+        temp.temp_value2 =  get_temp(NTC_2);
+        temp.temp_value3 =  get_temp(NTC_3);
+
+        if( temp.temp_value1 >= temp.temp_alarm_value )  
+        {
+            ac_dc.ac220_out1_temp_allow = 0;     
+        }else
+        {
+            ac_dc.ac220_out1_temp_allow = 1; 
+        }
+
+        if( temp.temp_value2 >= temp.temp_alarm_value )  
+        {
+            ac_dc.ac220_out2_temp_allow = 0;     
+        }else
+        {
+            ac_dc.ac220_out2_temp_allow = 1; 
+        }
+
+        if( temp.temp_value3 >= temp.temp_alarm_value )  
+        {
+            ac_dc.ac220_out3_temp_allow = 0;     
+        }else
+        {
+            ac_dc.ac220_out3_temp_allow = 1; 
+        }
+
+        temp.temp_scan_flag = 0;
     }
 }

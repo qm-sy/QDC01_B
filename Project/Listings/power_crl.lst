@@ -1,11 +1,11 @@
-C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/14/2025 00:10:11 PAGE 1   
+C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/14/2025 16:59:40 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE POWER_CRL
 OBJECT MODULE PLACED IN ..\Output\power_crl.obj
-COMPILER INVOKED BY: D:\APP\Keil_STM32\C51\BIN\C51.EXE ..\BSP\Src\power_crl.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(..\B
-                    -SP\Inc;..\Core\Inc;..\Driver;..\Emembed\Inc;..\SYSTEM\Inc) DEBUG OBJECTEXTEND PRINT(.\Listings\power_crl.lst) OBJECT(..\
-                    -Output\power_crl.obj)
+COMPILER INVOKED BY: D:\APP\Keil_v5\C51\BIN\C51.EXE ..\BSP\Src\power_crl.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(..\BSP\
+                    -Inc;..\Core\Inc;..\Driver;..\Emembed\Inc;..\SYSTEM\Inc) DEBUG OBJECTEXTEND PRINT(.\Listings\power_crl.lst) OBJECT(..\Out
+                    -put\power_crl.obj)
 
 line level    source
 
@@ -23,97 +23,245 @@ line level    source
   12          void Power_Statu_Init( void )
   13          {
   14   1          ac_dc.zero_flag  = 0;
-  15   1          AC_Out1 = AC_Out2 = AC_Out3 = 1;
-  16   1      }
-  17          
-  18          /**
-  19           * @brief       外部中断0中断处理函数
-  20           *
-  21           * @param   
-  22           *
-  23           * @return  void
-  24          **/
-  25          void INT0_ISR( void ) interrupt 0
-  26          {
-  27   1          /* 1, 检测到外部中断后，等待THL\TLI后触发TIM1中断       */
-  28   1          TL1 = ac_dc.time_delay;                             
-  29   1              TH1 = ac_dc.time_delay >> 8;                            
-  30   1      
-  31   1          ac_dc.zero_flag = 1;
-  32   1      
-  33   1          /* 2, 定时器1开始计时，打开TIM1中断                     */
-  34   1          TR1 = 1;                                 
-  35   1          ET1 = 1; 
-  36   1      }
-  37          
-  38          /**
-  39           * @brief       Timer1中断处理函数
-  40           *
-  41           * @param   
-  42           *
-  43           * @return  void
-  44          **/
-  45          void Tim1_ISR( void ) interrupt 3   //10ms
-  46          {
-  47   1          /* 1, 中断触发后，power_ch电平 由高电平变为低电平           */
-  48   1          if( ac_dc.zero_flag == 1 )
-  49   1          {
-  50   2              ac_dc.zero_flag = 0;
-  51   2              AC_Out3 = 0;
+  15   1          temp.temp_scan_flag = 0;
+  16   1          AC_Out1 = AC_Out2 = AC_Out3 = 1;
+  17   1      }
+  18          
+  19          /**
+  20           * @brief       外部中断0中断处理函数
+  21           *
+  22           * @param   
+  23           *
+  24           * @return  void
+  25          **/
+  26          void INT0_ISR( void ) interrupt 0
+  27          {
+  28   1          /* 1, 检测到外部中断后，等待THL\TLI后触发TIM1中断       */
+  29   1          TL1 = ac_dc.time_delay;                             
+  30   1              TH1 = ac_dc.time_delay >> 8;                            
+  31   1      
+  32   1          ac_dc.zero_flag = 1;
+  33   1      
+  34   1          /* 2, 定时器1开始计时，打开TIM1中断                     */
+  35   1          TR1 = 1;                                 
+  36   1          ET1 = 1; 
+  37   1      }
+  38          
+  39          /**
+  40           * @brief       Timer1中断处理函数
+  41           *
+  42           * @param   
+  43           *
+  44           * @return  void
+  45          **/
+  46          void Tim1_ISR( void ) interrupt 3   //10ms
+  47          {
+  48   1          /* 1, 中断触发后，power_ch电平 由高电平变为低电平           */
+  49   1          if( ac_dc.zero_flag == 1 )
+  50   1          {
+  51   2              ac_dc.zero_flag = 0;
   52   2      
-  53   2               /* 2, 设置下一次Timer1中断触发所需时间，即脉冲时间       */
-C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/14/2025 00:10:11 PAGE 2   
+  53   2               /* 2, 温度允许，使能为1时可开启输出          */
+C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/14/2025 16:59:40 PAGE 2   
 
-  54   2              TL1 = 0xF7;                             
-  55   2              TH1 = 0xFF;                             
-  56   2          }else
-  57   1          {
-  58   2              /* 3, 下一次进入Timer1中断，power_ch电平 由低电平变为高电平，完成一次10us�
+  54   2              if(( ac_dc.ac220_out1_enable == 1 ) && (ac_dc.ac220_out1_temp_allow == 1))
+  55   2              {
+  56   3                  AC_Out1 = 0;
+  57   3              }
+  58   2              if(( ac_dc.ac220_out2_enable == 1 ) && (ac_dc.ac220_out2_temp_allow == 1))
+  59   2              {
+  60   3                  AC_Out2 = 0;
+  61   3              }
+  62   2              if(( ac_dc.ac220_out3_enable == 1 ) && (ac_dc.ac220_out3_temp_allow == 1))
+  63   2              {
+  64   3                  AC_Out3 = 0;
+  65   3              }
+  66   2      
+  67   2               /* 3, 设置下一次Timer1中断触发所需时间，即脉冲时间       */
+  68   2              TL1 = 0xF7;                             
+  69   2              TH1 = 0xFF;                             
+  70   2          }else
+  71   1          {
+  72   2              /* 2, 下一次进入Timer1中断，power_ch电平 由低电平变为高电平，完成一次10us�
              -��冲，即斩波*/
-  59   2              AC_Out3 = 1;
-  60   2      
-  61   2              /* 4, 定时器1停止计时，关闭TIM1中断，等待下一次外部中断     */
-  62   2              TR1 = 0;                                    
-  63   2              ET1 = 0; 
-  64   2          }
-  65   1      }
-  66          
-  67          /**
-  68           * @brief       220V输出功率控制函数 
-  69           *
-  70           * @param   power_level：输出功率百分比  0%~100%
-  71           *
-  72           * @return  void
-  73          **/
-  74          void ac_220v_crl( uint8_t power_level )
-  75          {
-  76   1          ac_dc.time_delay = 58000 + 75*power_level;
-  77   1      }
-  78          
-  79          /**
-  80           * @brief       24V LED开关控制函数
-  81           *
-  82           * @param   on_off：0：关闭 1：开启
+  73   2              AC_Out1 = AC_Out2 = AC_Out3 = 1;
+  74   2      
+  75   2              /* 3, 定时器1停止计时，关闭TIM1中断，等待下一次外部中断     */
+  76   2              TR1 = 0;                                    
+  77   2              ET1 = 0; 
+  78   2          }
+  79   1      }
+  80          
+  81          /**
+  82           * @brief       220V输出功率控制函数 
   83           *
-  84           * @return  void
-  85          **/
-  86          void led_ctrl( uint8_t on_off )
-  87          {
-  88   1          if( on_off == FAN_ON )
-  89   1          {
-  90   2              LED = 0;
-  91   2          }else
-  92   1          {
-  93   2              LED = 1;
-  94   2          }
-  95   1      }
-  96          
+  84           * @param   power_level：输出功率百分比  0%~100%
+  85           *
+  86           * @return  void
+  87          **/
+  88          void ac_220v_crl( uint8_t power_level )
+  89          {
+  90   1          ac_dc.time_delay = 58000 + 75*power_level;
+  91   1      }
+  92          
+  93          /**
+  94           * @brief       24V LED开关控制函数
+  95           *
+  96           * @param   on_off：0：关闭 1：开启
+  97           *
+  98           * @return  void
+  99          **/
+ 100          void led_ctrl( uint8_t on_off )
+ 101          {
+ 102   1          if( on_off == FAN_ON )
+ 103   1          {
+ 104   2              LED = 0;
+ 105   2          }else
+ 106   1          {
+ 107   2              LED = 1;
+ 108   2          }
+ 109   1      }
+ 110          
+ 111          /**
+ 112           * @brief       24V PWM风扇档位控制函数
+ 113           *
+ 114           * @param   level :风扇档位 0~6档
+C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/14/2025 16:59:40 PAGE 3   
+
+ 115           *
+ 116           * @return  void
+ 117          **/
+ 118          void fan_ctrl( uint8_t level )
+ 119          {
+ 120   1          PWMB_CCR7= level * 184;
+ 121   1      }
+ 122          
+ 123          /**
+ 124           * @brief       同步控制函数：无外部信号时 PWM风扇和220V输出关闭
+ 125           *
+ 126           * @param   
+ 127           *
+ 128           * @return  void
+ 129          **/
+ 130          void sync_ctrl( void )
+ 131          {
+ 132   1          if( ac_dc.sync_flag == 1 )
+ 133   1          {
+ 134   2              if( ac_dc.signal_in_flag == 1 )
+ 135   2              {
+ 136   3                  PWMB_BKR = 0x80;    //PWM控制
+ 137   3                  EX0 = 1;            //外部中断控制
+ 138   3              }else
+ 139   2              {
+ 140   3                  PWMB_BKR = 0x00; 
+ 141   3                  EX0 = 0;
+ 142   3              }
+ 143   2          }else
+ 144   1          {
+ 145   2              PWMB_BKR = 0x80; 
+ 146   2              EX0 = 1;
+ 147   2          }
+ 148   1      }
+ 149          
+ 150          /**
+ 151           * @brief       模式控制函数 
+ 152           *
+ 153           * @param   
+ 154           *
+ 155           * @return  void
+ 156          **/
+ 157          void mode_ctrl( uint8_t mode_num )
+ 158          {
+ 159   1          switch (mode_num)
+ 160   1          {
+ 161   2              case 0x01:
+ 162   2                  ac_220v_crl(30);
+ 163   2                  fan_ctrl(3);
+ 164   2      
+ 165   2                  eeprom.ac220_level = 30;
+ 166   2                  eeprom.pwm_info = 3;
+ 167   2                  eeprom_data_record();
+ 168   2      
+ 169   2                  break;
+ 170   2      
+ 171   2              case 0x02:
+ 172   2                  ac_220v_crl(50);
+ 173   2                  fan_ctrl(4);
+ 174   2      
+ 175   2                  eeprom.ac220_level = 50;
+ 176   2                  eeprom.pwm_info = 4;
+C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/14/2025 16:59:40 PAGE 4   
+
+ 177   2                  eeprom_data_record();
+ 178   2      
+ 179   2                  break;
+ 180   2      
+ 181   2              case 0x04:
+ 182   2                  ac_220v_crl(80);
+ 183   2                  fan_ctrl(6);
+ 184   2      
+ 185   2                  eeprom.ac220_level = 80;
+ 186   2                  eeprom.pwm_info = 6;
+ 187   2                  eeprom_data_record();
+ 188   2      
+ 189   2                  break;
+ 190   2      
+ 191   2              default:
+ 192   2                  break;
+ 193   2          }
+ 194   1      }
+ 195          
+ 196          /**
+ 197           * @brief 温度扫描，1s/次 控制220V输出使能
+ 198           *
+ 199           * @param[in] 
+ 200           * 
+ 201           * @return  
+ 202           * 
+ 203          **/
+ 204          void temp_scan( void )
+ 205          {
+ 206   1          if( temp.temp_scan_flag == 1)
+ 207   1          {
+ 208   2              temp.temp_value1 =  get_temp(NTC_1);
+ 209   2              temp.temp_value2 =  get_temp(NTC_2);
+ 210   2              temp.temp_value3 =  get_temp(NTC_3);
+ 211   2      
+ 212   2              if( temp.temp_value1 >= temp.temp_alarm_value )  
+ 213   2              {
+ 214   3                  ac_dc.ac220_out1_temp_allow = 0;     
+ 215   3              }else
+ 216   2              {
+ 217   3                  ac_dc.ac220_out1_temp_allow = 1; 
+ 218   3              }
+ 219   2      
+ 220   2              if( temp.temp_value2 >= temp.temp_alarm_value )  
+ 221   2              {
+ 222   3                  ac_dc.ac220_out2_temp_allow = 0;     
+ 223   3              }else
+ 224   2              {
+ 225   3                  ac_dc.ac220_out2_temp_allow = 1; 
+ 226   3              }
+ 227   2      
+ 228   2              if( temp.temp_value3 >= temp.temp_alarm_value )  
+ 229   2              {
+ 230   3                  ac_dc.ac220_out3_temp_allow = 0;     
+ 231   3              }else
+ 232   2              {
+ 233   3                  ac_dc.ac220_out3_temp_allow = 1; 
+ 234   3              }
+ 235   2      
+ 236   2              temp.temp_scan_flag = 0;
+ 237   2          }
+ 238   1      }
+C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/14/2025 16:59:40 PAGE 5   
+
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    130    ----
+   CODE SIZE        =    433    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =      8    ----
+   XDATA SIZE       =     12    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
