@@ -160,21 +160,21 @@ void Modbus_Fun4( void )
             /*  30001  NTC1、NTC2温度查询                           */
             case 0x00:
                 modbus.byte_info_L = get_temp(NTC_1);
-                modbus.byte_info_H = get_temp(NTC_2);   
+                modbus.byte_info_H = 0x00;   
 
                 break;
 
             /*  30002  NTC3、NTC4温度查询                */
             case 0x01:
-                modbus.byte_info_H = get_temp(NTC_4);    
-                modbus.byte_info_L = get_temp(NTC_3);
+                modbus.byte_info_H = 0x00;    
+                modbus.byte_info_L = 0x00;
 
                 break;
 
             /*  30003 环境温湿度查询                   */
             case 0x02:
-                modbus.byte_info_H = 0x41;           
-                modbus.byte_info_L = 0x19;          
+                modbus.byte_info_H = temp.dht11_humidity;           
+                modbus.byte_info_L = temp.dht11_temp;          
 
                 break;
 
@@ -185,6 +185,20 @@ void Modbus_Fun4( void )
 
                 break;
                 
+            /*  30005 运行时间（min）                   */
+            case 0x04:
+                modbus.byte_info_H = 0x00;           
+                modbus.byte_info_L = gonglv.gonglv_min;          
+
+                break;
+
+            /*  30006 运行时间（h）                   */
+            case 0x05:
+                modbus.byte_info_H = gonglv.gonglv_h >> 8;           
+                modbus.byte_info_L = gonglv.gonglv_h;          
+
+                break;
+
             default:
                 break;
         }
@@ -331,7 +345,10 @@ void Modbus_Fun16( void )
             /*  40005  工作模式设置                   */
             case 0x04:                                         
                 ac_dc.mode_info = modbus.byte_info_L;
-                mode_ctrl(ac_dc.mode_info);
+                if( modbus.byte_info_H == 1)
+                {
+                    mode_ctrl(ac_dc.mode_info);
+                }
 
                 eeprom.mode_info = modbus.byte_info_L;
 
@@ -374,8 +391,8 @@ void slave_to_master(uint8_t code_num,uint8_t length)
         case 0x03:
             crc = MODBUS_CRC16(rs485.TX4_buf,length);
 
-            rs485.TX4_buf[length] = crc;                 //CRC H
-            rs485.TX4_buf[length+1] = crc>>8;            //CRC L
+            rs485.TX4_buf[length+1] = crc;                 //CRC H
+            rs485.TX4_buf[length] = crc>>8;            //CRC L
 
             rs485.TX4_send_bytelength = length + 2;
             
@@ -383,8 +400,8 @@ void slave_to_master(uint8_t code_num,uint8_t length)
         case 0x04:
             crc = MODBUS_CRC16(rs485.TX4_buf,length);
 
-            rs485.TX4_buf[length] = crc;                 //CRC H
-            rs485.TX4_buf[length+1] = crc>>8;            //CRC L
+            rs485.TX4_buf[length+1] = crc;                 //CRC H
+            rs485.TX4_buf[length] = crc>>8;            //CRC L
 
             rs485.TX4_send_bytelength = length + 2;
             

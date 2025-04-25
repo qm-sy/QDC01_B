@@ -14,6 +14,8 @@
         "eeprom_crl.h": "c",
         "eeprom.h": "c",
         "power_crl.h": "c",
-        "STDIO.H": "cpp"
+        "STDIO.H": "cpp",
+        "dht11.h": "c",
+        "common.h": "c"
     }
 }

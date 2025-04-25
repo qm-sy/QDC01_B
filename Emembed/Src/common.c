@@ -11,6 +11,9 @@ void Tim3_ISR( void ) interrupt 19
 {
 
     static uint16_t temp_scan_cnt = 0;
+    static uint8_t channel1_cnt,channel2_cnt,channel3_cnt = 0;
+    static uint16_t gonglv_time = 0;
+    static uint16_t ac220_flag_cnt = 0;
 
     /* 1, Signal_IN状态查询           */
     if( Signal_IN == 1 )
@@ -29,6 +32,57 @@ void Tim3_ISR( void ) interrupt 19
         {
             temp.temp_scan_flag = 1;
             temp_scan_cnt = 0;
+        }
+    }
+    /*3, 耗电计时*/
+    if( ac_dc.ac220_flag == 1) 
+    {
+        ac220_flag_cnt++;
+        if( ac220_flag_cnt == 500 )
+        {
+            ac220_flag_cnt = 0;
+            ac_dc.ac220_flag = 0;
+        }
+    }
+
+    /*4, 耗电计时*/
+    if( ac_dc.ac220_flag == 1) 
+    {
+        if(( ac_dc.ac220_out1_enable == 1 ) && (ac_dc.ac220_out1_temp_allow == 1))
+        {
+            channel1_cnt++;
+        }
+        if(( ac_dc.ac220_out2_enable == 1 ) && (ac_dc.ac220_out2_temp_allow == 1))
+        {
+            channel2_cnt++;
+        }
+        if(( ac_dc.ac220_out3_enable == 1 ) && (ac_dc.ac220_out3_temp_allow == 1))
+        {
+            channel3_cnt++;
+        }
+    }
+    
+    gonglv_time = (channel1_cnt + channel2_cnt + channel3_cnt) * eeprom.ac220_level;
+
+    if( gonglv_time >= 30000 )  //1s
+    {
+        gonglv.gonglv_s ++;
+        gonglv_time = 0;
+        channel1_cnt = channel2_cnt = channel3_cnt = 0;
+
+        if( gonglv.gonglv_s == 60 )   //1min
+        {
+            gonglv.gonglv_min++;
+            gonglv.gonglv_s = 0;
+            eeprom.gonglv_min = gonglv.gonglv_min;
+            gonglv.gonglv_memory_flag = 1;
+            if( gonglv.gonglv_min == 60 )    //1h
+            {
+                gonglv.gonglv_h++;
+                eeprom.gonglv_h_H = (gonglv.gonglv_h >> 8);
+                eeprom.gonglv_h_L = gonglv.gonglv_h;
+                gonglv.gonglv_min = 0;
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   COMMON                                                            04/14/2025 16:59:40 PAGE 1   
+C51 COMPILER V9.60.7.0   COMMON                                                            04/24/2025 16:53:25 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE COMMON
@@ -22,33 +22,89 @@ line level    source
   11          {
   12   1      
   13   1          static uint16_t temp_scan_cnt = 0;
-  14   1      
-  15   1          /* 1, Signal_IN状态查询           */
-  16   1          if( Signal_IN == 1 )
-  17   1          {
-  18   2              ac_dc.signal_in_flag = 1;
-  19   2          }else
+  14   1          static uint8_t channel1_cnt,channel2_cnt,channel3_cnt = 0;
+  15   1          static uint16_t gonglv_time = 0;
+  16   1          static uint16_t ac220_flag_cnt = 0;
+  17   1      
+  18   1          /* 1, Signal_IN状态查询           */
+  19   1          if( Signal_IN == 1 )
   20   1          {
-  21   2              ac_dc.signal_in_flag = 0;
-  22   2          }
-  23   1      
-  24   1          /* 2, temp 上报 1s/次                             */
-  25   1          if( temp.temp_scan_flag == 0 )
-  26   1          {
-  27   2              temp_scan_cnt++;
-  28   2              if( temp_scan_cnt == 100 )
-  29   2              {
-  30   3                  temp.temp_scan_flag = 1;
-  31   3                  temp_scan_cnt = 0;
-  32   3              }
-  33   2          }
-  34   1      }
+  21   2              ac_dc.signal_in_flag = 1;
+  22   2          }else
+  23   1          {
+  24   2              ac_dc.signal_in_flag = 0;
+  25   2          }
+  26   1      
+  27   1          /* 2, temp 上报 1s/次                             */
+  28   1          if( temp.temp_scan_flag == 0 )
+  29   1          {
+  30   2              temp_scan_cnt++;
+  31   2              if( temp_scan_cnt == 100 )
+  32   2              {
+  33   3                  temp.temp_scan_flag = 1;
+  34   3                  temp_scan_cnt = 0;
+  35   3              }
+  36   2          }
+  37   1          /*3, 耗电计时*/
+  38   1          if( ac_dc.ac220_flag == 1) 
+  39   1          {
+  40   2              ac220_flag_cnt++;
+  41   2              if( ac220_flag_cnt == 500 )
+  42   2              {
+  43   3                  ac220_flag_cnt = 0;
+  44   3                  ac_dc.ac220_flag = 0;
+  45   3              }
+  46   2          }
+  47   1      
+  48   1          /*4, 耗电计时*/
+  49   1          if( ac_dc.ac220_flag == 1) 
+  50   1          {
+  51   2              if(( ac_dc.ac220_out1_enable == 1 ) && (ac_dc.ac220_out1_temp_allow == 1))
+  52   2              {
+  53   3                  channel1_cnt++;
+C51 COMPILER V9.60.7.0   COMMON                                                            04/24/2025 16:53:25 PAGE 2   
+
+  54   3              }
+  55   2              if(( ac_dc.ac220_out2_enable == 1 ) && (ac_dc.ac220_out2_temp_allow == 1))
+  56   2              {
+  57   3                  channel2_cnt++;
+  58   3              }
+  59   2              if(( ac_dc.ac220_out3_enable == 1 ) && (ac_dc.ac220_out3_temp_allow == 1))
+  60   2              {
+  61   3                  channel3_cnt++;
+  62   3              }
+  63   2          }
+  64   1          
+  65   1          gonglv_time = (channel1_cnt + channel2_cnt + channel3_cnt) * eeprom.ac220_level;
+  66   1      
+  67   1          if( gonglv_time >= 30000 )  //1s
+  68   1          {
+  69   2              gonglv.gonglv_s ++;
+  70   2              gonglv_time = 0;
+  71   2              channel1_cnt = channel2_cnt = channel3_cnt = 0;
+  72   2      
+  73   2              if( gonglv.gonglv_s == 60 )   //1min
+  74   2              {
+  75   3                  gonglv.gonglv_min++;
+  76   3                  gonglv.gonglv_s = 0;
+  77   3                  eeprom.gonglv_min = gonglv.gonglv_min;
+  78   3                  gonglv.gonglv_memory_flag = 1;
+  79   3                  if( gonglv.gonglv_min == 60 )    //1h
+  80   3                  {
+  81   4                      gonglv.gonglv_h++;
+  82   4                      eeprom.gonglv_h_H = (gonglv.gonglv_h >> 8);
+  83   4                      eeprom.gonglv_h_L = gonglv.gonglv_h;
+  84   4                      gonglv.gonglv_min = 0;
+  85   4                  }
+  86   3              }
+  87   2          }
+  88   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =     70    ----
+   CODE SIZE        =    358    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =      2    ----
+   XDATA SIZE       =      9    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

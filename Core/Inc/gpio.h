@@ -17,7 +17,7 @@ sbit RX_485      = P0^2;
 sbit TX_485      = P0^3;
 sbit DR_485      = P0^4;
 
-sbit Analog1     = P1^0;
+sbit Temp_Hum    = P1^0;
 sbit Analog2     = P1^1;
 sbit Signal_IN   = P1^3;
 sbit NTC1        = P1^4;

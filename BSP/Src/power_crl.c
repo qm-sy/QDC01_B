@@ -1,6 +1,7 @@
 #include "power_crl.h"
 
 AC_DC ac_dc;
+GONGLV gonglv;
 
 /**
  * @brief	移相触发调用结构体初始化
@@ -12,8 +13,24 @@ AC_DC ac_dc;
 void Power_Statu_Init( void )
 {
     ac_dc.zero_flag  = 0;
+    ac_dc.ac220_flag = 0;
     temp.temp_scan_flag = 0;
     AC_Out1 = AC_Out2 = AC_Out3 = 1;
+}
+
+/**
+ * @brief	功率计时初始化
+ *
+ * @param   
+ *
+ * @return  void
+**/
+void power_time_Init( void )
+{
+    gonglv.gonglv_cnt = 0;
+    gonglv.gonglv_min = 0;
+    gonglv.gonglv_h = 0;
+    gonglv.gonglv_memory_flag = 0;
 }
 
 /**
@@ -30,6 +47,7 @@ void INT0_ISR( void ) interrupt 0
 	TH1 = ac_dc.time_delay >> 8;				
 
     ac_dc.zero_flag = 1;
+    ac_dc.ac220_flag = 1;
 
     /* 2, 定时器1开始计时，打开TIM1中断                     */
     TR1 = 1;				     
@@ -87,7 +105,7 @@ void Tim1_ISR( void ) interrupt 3   //10ms
 **/
 void ac_220v_crl( uint8_t power_level )
 {
-    ac_dc.time_delay = 58000 + 75*power_level;
+    ac_dc.time_delay = 56500 + 90*power_level;
 }
 
 /**
@@ -127,7 +145,7 @@ void fan_ctrl( uint8_t level )
  *
  * @return  void
 **/
-void sync_ctrl( void )
+void    sync_ctrl( void )
 {
     if( ac_dc.sync_flag == 1 )
     {
@@ -158,7 +176,7 @@ void mode_ctrl( uint8_t mode_num )
 {
     switch (mode_num)
     {
-        case 0x01:
+        case 1:
             ac_220v_crl(30);
             fan_ctrl(3);
 
@@ -168,7 +186,7 @@ void mode_ctrl( uint8_t mode_num )
 
             break;
 
-        case 0x02:
+        case 2:
             ac_220v_crl(50);
             fan_ctrl(4);
 
@@ -178,7 +196,7 @@ void mode_ctrl( uint8_t mode_num )
 
             break;
 
-        case 0x04:
+        case 3:
             ac_220v_crl(80);
             fan_ctrl(6);
 
@@ -206,30 +224,20 @@ void temp_scan( void )
     if( temp.temp_scan_flag == 1)
     {
         temp.temp_value1 =  get_temp(NTC_1);
-        temp.temp_value2 =  get_temp(NTC_2);
-        temp.temp_value3 =  get_temp(NTC_3);
+        // temp.temp_value2 =  get_temp(NTC_2);
+        // temp.temp_value3 =  get_temp(NTC_3);
+        Read_DHT11();
 
         if( temp.temp_value1 >= temp.temp_alarm_value )  
         {
             ac_dc.ac220_out1_temp_allow = 0;     
-        }else
-        {
-            ac_dc.ac220_out1_temp_allow = 1; 
-        }
+            ac_dc.ac220_out2_temp_allow = 0;
+            ac_dc.ac220_out3_temp_allow = 0;  
 
-        if( temp.temp_value2 >= temp.temp_alarm_value )  
-        {
-            ac_dc.ac220_out2_temp_allow = 0;     
         }else
         {
-            ac_dc.ac220_out2_temp_allow = 1; 
-        }
-
-        if( temp.temp_value3 >= temp.temp_alarm_value )  
-        {
-            ac_dc.ac220_out3_temp_allow = 0;     
-        }else
-        {
+            ac_dc.ac220_out1_temp_allow = 1;     
+            ac_dc.ac220_out2_temp_allow = 1;
             ac_dc.ac220_out3_temp_allow = 1; 
         }
 

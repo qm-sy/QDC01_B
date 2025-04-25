@@ -22,6 +22,7 @@ void main( void )
 
     /*  4路220输出控制  */
     Power_Statu_Init();
+    power_time_Init();
     Timer3_Init();
     INT0_Init();
     Timer1_Init();
@@ -37,5 +38,10 @@ void main( void )
         Modbus_Event();
         temp_scan();
         sync_ctrl();  
+        if(gonglv.gonglv_memory_flag == 1)
+        {
+            eeprom_data_record(); 
+            gonglv.gonglv_memory_flag = 0;
+        }
     }  
 }

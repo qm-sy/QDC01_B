@@ -24,6 +24,9 @@ void eeprom_statu_judge( void )
         eeprom.sync_info         = 0x00;          // 0000 0000  同步模式默认关闭
         eeprom.mode_info         = 0x02;          // 0000 0010  工作模式默认普通
         eeprom.temp_alarm_value  = 0x50;          // NTC1 alarm value 默认80℃
+        eeprom.gonglv_min        = 0x00;
+        eeprom.gonglv_h_H        = 0x00;
+        eeprom.gonglv_h_L        = 0x00;
 
         eeprom_data_record(); 
     }
@@ -48,6 +51,9 @@ void eeprom_data_record( void )
     ISP_Write(SYNC_ADDR,eeprom.sync_info);
     ISP_Write(MODE_ADDR,eeprom.mode_info);
     ISP_Write(TEMP_ALARM,eeprom.temp_alarm_value);
+    ISP_Write(GONGLV_MIN,eeprom.gonglv_min);
+    ISP_Write(GONGLV_H_H,eeprom.gonglv_h_H);
+    ISP_Write(GONGLV_H_L,eeprom.gonglv_h_L);
 
     ISP_Write(EEPROM_STATU_JUDGE,0x58);
 }
@@ -99,4 +105,8 @@ void eeprom_data_init( void )
     eeprom.temp_alarm_value = ISP_Read(TEMP_ALARM);
 
     temp.temp_alarm_value = eeprom.temp_alarm_value;
+
+    /*    报警温度初始化    */
+    gonglv.gonglv_min = eeprom.gonglv_min;
+    gonglv.gonglv_h = ((eeprom.gonglv_h_H << 8) | (eeprom.gonglv_h_L));
 }

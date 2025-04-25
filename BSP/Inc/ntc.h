@@ -18,6 +18,9 @@ typedef struct
     uint8_t  temp_value3;  
     uint8_t  temp_alarm_value;
     uint8_t  temp_scan_flag;
+
+    uint8_t  dht11_temp;
+    uint8_t  dht11_humidity;
 }TEMP;
 
 extern TEMP temp;

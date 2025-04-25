@@ -6,5 +6,6 @@
 #include "power_crl.h"
 #include "ntc.h"
 #include "communication.h"
+#include "eeprom_crl.h"
 
 #endif

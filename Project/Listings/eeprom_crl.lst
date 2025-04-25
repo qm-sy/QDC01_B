@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   EEPROM_CRL                                                        04/14/2025 16:59:40 PAGE 1   
+C51 COMPILER V9.60.7.0   EEPROM_CRL                                                        04/24/2025 16:53:24 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE EEPROM_CRL
@@ -35,90 +35,102 @@ line level    source
   24   2              eeprom.sync_info         = 0x00;          // 0000 0000  同步模式默认关闭
   25   2              eeprom.mode_info         = 0x02;          // 0000 0010  工作模式默认普通
   26   2              eeprom.temp_alarm_value  = 0x50;          // NTC1 alarm value 默认80℃
-  27   2      
-  28   2              eeprom_data_record(); 
-  29   2          }
-  30   1          eeprom_data_init();    
-  31   1      }
-  32          
-  33          /**
-  34           * @brief       eeprom 数据写入
-  35           *
-  36           * @param   
-  37           *
-  38           * @return  void
-  39          **/
-  40          void eeprom_data_record( void )
-  41          {
-  42   1          ISP_Earse(0x0000);
-  43   1      
-  44   1          ISP_Write(PWM_ADDR,eeprom.pwm_info);
-  45   1          ISP_Write(LED_ADDR,eeprom.led_info);
-  46   1          ISP_Write(AC220_ADDR1,eeprom.ac220_switch);
-  47   1          ISP_Write(AC220_ADDR2,eeprom.ac220_level);
-  48   1          ISP_Write(SYNC_ADDR,eeprom.sync_info);
-  49   1          ISP_Write(MODE_ADDR,eeprom.mode_info);
-  50   1          ISP_Write(TEMP_ALARM,eeprom.temp_alarm_value);
-  51   1      
-  52   1          ISP_Write(EEPROM_STATU_JUDGE,0x58);
-  53   1      }
-C51 COMPILER V9.60.7.0   EEPROM_CRL                                                        04/14/2025 16:59:40 PAGE 2   
+  27   2              eeprom.gonglv_min        = 0x00;
+  28   2              eeprom.gonglv_h_H        = 0x00;
+  29   2              eeprom.gonglv_h_L        = 0x00;
+  30   2      
+  31   2              eeprom_data_record(); 
+  32   2          }
+  33   1          eeprom_data_init();    
+  34   1      }
+  35          
+  36          /**
+  37           * @brief       eeprom 数据写入
+  38           *
+  39           * @param   
+  40           *
+  41           * @return  void
+  42          **/
+  43          void eeprom_data_record( void )
+  44          {
+  45   1          ISP_Earse(0x0000);
+  46   1      
+  47   1          ISP_Write(PWM_ADDR,eeprom.pwm_info);
+  48   1          ISP_Write(LED_ADDR,eeprom.led_info);
+  49   1          ISP_Write(AC220_ADDR1,eeprom.ac220_switch);
+  50   1          ISP_Write(AC220_ADDR2,eeprom.ac220_level);
+  51   1          ISP_Write(SYNC_ADDR,eeprom.sync_info);
+  52   1          ISP_Write(MODE_ADDR,eeprom.mode_info);
+  53   1          ISP_Write(TEMP_ALARM,eeprom.temp_alarm_value);
+C51 COMPILER V9.60.7.0   EEPROM_CRL                                                        04/24/2025 16:53:24 PAGE 2   
 
-  54          
-  55          /**
-  56           * @brief       eeprom 数据初始化
-  57           *
-  58           * @param   
-  59           *
-  60           * @return  void
-  61          **/
-  62          void eeprom_data_init( void )
-  63          {
-  64   1          /*    PWM风速初始化    */
-  65   1          eeprom.pwm_info = ISP_Read(PWM_ADDR);
-  66   1      
-  67   1          PWMB_CCR7 = eeprom.pwm_info * 184;
-  68   1      
-  69   1          /*    LED开关状态初始化    */
-  70   1          eeprom.led_info = ISP_Read(LED_ADDR);
-  71   1      
-  72   1          led_ctrl(eeprom.led_info );
-  73   1      
-  74   1          /*    三路220V输出使能初始化    */
-  75   1          eeprom.ac220_switch = ISP_Read(AC220_ADDR1);
-  76   1      
-  77   1          ac_dc.ac220_out1_enable = ((eeprom.ac220_switch) & 0x01);
-  78   1          ac_dc.ac220_out2_enable = ((eeprom.ac220_switch >> 1) & 0x01);
-  79   1          ac_dc.ac220_out3_enable = ((eeprom.ac220_switch >> 2) & 0x01);
-  80   1      
-  81   1          /*    三路220V输出功率初始化    */
-  82   1          eeprom.ac220_level = ISP_Read(AC220_ADDR2);
-  83   1      
-  84   1          ac_220v_crl(eeprom.ac220_level);
-  85   1      
-  86   1          /*    同步状态初始化    */
-  87   1          eeprom.sync_info = ISP_Read(SYNC_ADDR);
-  88   1          
-  89   1          ac_dc.sync_flag = eeprom.sync_info;
-  90   1          sync_ctrl();
+  54   1          ISP_Write(GONGLV_MIN,eeprom.gonglv_min);
+  55   1          ISP_Write(GONGLV_H_H,eeprom.gonglv_h_H);
+  56   1          ISP_Write(GONGLV_H_L,eeprom.gonglv_h_L);
+  57   1      
+  58   1          ISP_Write(EEPROM_STATU_JUDGE,0x58);
+  59   1      }
+  60          
+  61          /**
+  62           * @brief       eeprom 数据初始化
+  63           *
+  64           * @param   
+  65           *
+  66           * @return  void
+  67          **/
+  68          void eeprom_data_init( void )
+  69          {
+  70   1          /*    PWM风速初始化    */
+  71   1          eeprom.pwm_info = ISP_Read(PWM_ADDR);
+  72   1      
+  73   1          PWMB_CCR7 = eeprom.pwm_info * 184;
+  74   1      
+  75   1          /*    LED开关状态初始化    */
+  76   1          eeprom.led_info = ISP_Read(LED_ADDR);
+  77   1      
+  78   1          led_ctrl(eeprom.led_info );
+  79   1      
+  80   1          /*    三路220V输出使能初始化    */
+  81   1          eeprom.ac220_switch = ISP_Read(AC220_ADDR1);
+  82   1      
+  83   1          ac_dc.ac220_out1_enable = ((eeprom.ac220_switch) & 0x01);
+  84   1          ac_dc.ac220_out2_enable = ((eeprom.ac220_switch >> 1) & 0x01);
+  85   1          ac_dc.ac220_out3_enable = ((eeprom.ac220_switch >> 2) & 0x01);
+  86   1      
+  87   1          /*    三路220V输出功率初始化    */
+  88   1          eeprom.ac220_level = ISP_Read(AC220_ADDR2);
+  89   1      
+  90   1          ac_220v_crl(eeprom.ac220_level);
   91   1      
-  92   1          /*    工作模式初始化    */
-  93   1          eeprom.mode_info = ISP_Read(MODE_ADDR);
+  92   1          /*    同步状态初始化    */
+  93   1          eeprom.sync_info = ISP_Read(SYNC_ADDR);
   94   1          
-  95   1          ac_dc.mode_info  = eeprom.mode_info;
-  96   1          mode_ctrl(ac_dc.mode_info);
+  95   1          ac_dc.sync_flag = eeprom.sync_info;
+  96   1          sync_ctrl();
   97   1      
-  98   1          /*    报警温度初始化    */
-  99   1          eeprom.temp_alarm_value = ISP_Read(TEMP_ALARM);
- 100   1      
- 101   1          temp.temp_alarm_value = eeprom.temp_alarm_value;
- 102   1      }
+  98   1          /*    工作模式初始化    */
+  99   1          eeprom.mode_info = ISP_Read(MODE_ADDR);
+ 100   1          
+ 101   1          ac_dc.mode_info  = eeprom.mode_info;
+ 102   1          mode_ctrl(ac_dc.mode_info);
+ 103   1      
+ 104   1          /*    报警温度初始化    */
+ 105   1          eeprom.temp_alarm_value = ISP_Read(TEMP_ALARM);
+ 106   1      
+ 107   1          temp.temp_alarm_value = eeprom.temp_alarm_value;
+ 108   1      
+ 109   1          /*    报警温度初始化    */
+ 110   1          gonglv.gonglv_min = eeprom.gonglv_min;
+ 111   1          gonglv.gonglv_h = ((eeprom.gonglv_h_H << 8) | (eeprom.gonglv_h_L));
+ 112   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    294    ----
+C51 COMPILER V9.60.7.0   EEPROM_CRL                                                        04/24/2025 16:53:24 PAGE 3   
+
+   CODE SIZE        =    363    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =      7    ----
+   XDATA SIZE       =     10    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
