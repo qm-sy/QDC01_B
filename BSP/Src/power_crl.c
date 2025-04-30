@@ -25,12 +25,12 @@ void Power_Statu_Init( void )
  *
  * @return  void
 **/
-void power_time_Init( void )
+void Power_consumption_Init( void )
 {
     gonglv.gonglv_cnt = 0;
     gonglv.gonglv_min = 0;
     gonglv.gonglv_h = 0;
-    gonglv.gonglv_memory_flag = 0;
+    gonglv.gonglv_record_flag = 0;
 }
 
 /**
@@ -69,15 +69,15 @@ void Tim1_ISR( void ) interrupt 3   //10ms
         ac_dc.zero_flag = 0;
 
          /* 2, 温度允许，使能为1时可开启输出          */
-        if(( ac_dc.ac220_out1_enable == 1 ) && (ac_dc.ac220_out1_temp_allow == 1))
+        if(( ac_dc.ac220_out1_enable == 1 ) && (ac_dc.ac220_out_temp_allow == 1))
         {
             AC_Out1 = 0;
         }
-        if(( ac_dc.ac220_out2_enable == 1 ) && (ac_dc.ac220_out2_temp_allow == 1))
+        if(( ac_dc.ac220_out2_enable == 1 ) && (ac_dc.ac220_out_temp_allow == 1))
         {
             AC_Out2 = 0;
         }
-        if(( ac_dc.ac220_out3_enable == 1 ) && (ac_dc.ac220_out3_temp_allow == 1))
+        if(( ac_dc.ac220_out3_enable == 1 ) && (ac_dc.ac220_out_temp_allow == 1))
         {
             AC_Out3 = 0;
         }
@@ -145,7 +145,7 @@ void fan_ctrl( uint8_t level )
  *
  * @return  void
 **/
-void    sync_ctrl( void )
+void sync_ctrl( void )
 {
     if( ac_dc.sync_flag == 1 )
     {
@@ -162,6 +162,51 @@ void    sync_ctrl( void )
     {
         PWMB_BKR = 0x80; 
         EX0 = 1;
+    }
+}
+
+/**
+ * @brief 温度扫描，DHT11温湿度扫描 1s/次 控制220V输出使能
+ *
+ * @param[in] 
+ * 
+ * @return  
+ * 
+**/
+void temp_scan( void )
+{
+    if( temp.temp_scan_flag == 1)
+    {
+        temp.temp_value1 =  get_temp(NTC);
+
+        Read_DHT11();
+
+        if( temp.temp_value1 >= temp.temp_alarm_value )  
+        {
+            ac_dc.ac220_out_temp_allow = 0;     
+        }else
+        {
+            ac_dc.ac220_out_temp_allow = 1;     
+        }
+
+        temp.temp_scan_flag = 0;
+    }
+}
+
+/**
+ * @brief 用电量累计扫描 三路全开满功率1min记录一次
+ *
+ * @param[in] 
+ * 
+ * @return  
+ * 
+**/
+void Power_consumption_scan( void )
+{
+    if( gonglv.gonglv_record_flag == 1 )
+    {
+        eeprom_data_record(); 
+        gonglv.gonglv_record_flag = 0;
     }
 }
 
@@ -208,39 +253,5 @@ void mode_ctrl( uint8_t mode_num )
 
         default:
             break;
-    }
-}
-
-/**
- * @brief 温度扫描，1s/次 控制220V输出使能
- *
- * @param[in] 
- * 
- * @return  
- * 
-**/
-void temp_scan( void )
-{
-    if( temp.temp_scan_flag == 1)
-    {
-        temp.temp_value1 =  get_temp(NTC_1);
-        // temp.temp_value2 =  get_temp(NTC_2);
-        // temp.temp_value3 =  get_temp(NTC_3);
-        Read_DHT11();
-
-        if( temp.temp_value1 >= temp.temp_alarm_value )  
-        {
-            ac_dc.ac220_out1_temp_allow = 0;     
-            ac_dc.ac220_out2_temp_allow = 0;
-            ac_dc.ac220_out3_temp_allow = 0;  
-
-        }else
-        {
-            ac_dc.ac220_out1_temp_allow = 1;     
-            ac_dc.ac220_out2_temp_allow = 1;
-            ac_dc.ac220_out3_temp_allow = 1; 
-        }
-
-        temp.temp_scan_flag = 0;
     }
 }

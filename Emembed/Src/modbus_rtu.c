@@ -159,7 +159,7 @@ void Modbus_Fun4( void )
         {
             /*  30001  NTC1、NTC2温度查询                           */
             case 0x00:
-                modbus.byte_info_L = get_temp(NTC_1);
+                modbus.byte_info_L = get_temp(NTC);
                 modbus.byte_info_H = 0x00;   
 
                 break;

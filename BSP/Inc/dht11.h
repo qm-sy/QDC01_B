@@ -7,7 +7,7 @@
 #include "communication.h"
 #include "ntc.h"
 
-void DHT11_start();
-void Read_DHT11(void);   //温湿传感启动
+void DHT11_start( void );
+void Read_DHT11( void );   
 
 #endif

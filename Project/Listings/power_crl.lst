@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/24/2025 16:53:24 PAGE 1   
+C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/30/2025 15:37:50 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE POWER_CRL
@@ -36,12 +36,12 @@ line level    source
   25           *
   26           * @return  void
   27          **/
-  28          void power_time_Init( void )
+  28          void Power_consumption_Init( void )
   29          {
   30   1          gonglv.gonglv_cnt = 0;
   31   1          gonglv.gonglv_min = 0;
   32   1          gonglv.gonglv_h = 0;
-  33   1          gonglv.gonglv_memory_flag = 0;
+  33   1          gonglv.gonglv_record_flag = 0;
   34   1      }
   35          
   36          /**
@@ -62,7 +62,7 @@ line level    source
   51   1      
   52   1          /* 2, 定时器1开始计时，打开TIM1中断                     */
   53   1          TR1 = 1;                                 
-C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/24/2025 16:53:24 PAGE 2   
+C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/30/2025 15:37:50 PAGE 2   
 
   54   1          ET1 = 1; 
   55   1      }
@@ -82,15 +82,15 @@ line level    source
   69   2              ac_dc.zero_flag = 0;
   70   2      
   71   2               /* 2, 温度允许，使能为1时可开启输出          */
-  72   2              if(( ac_dc.ac220_out1_enable == 1 ) && (ac_dc.ac220_out1_temp_allow == 1))
+  72   2              if(( ac_dc.ac220_out1_enable == 1 ) && (ac_dc.ac220_out_temp_allow == 1))
   73   2              {
   74   3                  AC_Out1 = 0;
   75   3              }
-  76   2              if(( ac_dc.ac220_out2_enable == 1 ) && (ac_dc.ac220_out2_temp_allow == 1))
+  76   2              if(( ac_dc.ac220_out2_enable == 1 ) && (ac_dc.ac220_out_temp_allow == 1))
   77   2              {
   78   3                  AC_Out2 = 0;
   79   3              }
-  80   2              if(( ac_dc.ac220_out3_enable == 1 ) && (ac_dc.ac220_out3_temp_allow == 1))
+  80   2              if(( ac_dc.ac220_out3_enable == 1 ) && (ac_dc.ac220_out_temp_allow == 1))
   81   2              {
   82   3                  AC_Out3 = 0;
   83   3              }
@@ -126,7 +126,7 @@ line level    source
  112           * @brief       24V LED开关控制函数
  113           *
  114           * @param   on_off：0：关闭 1：开启
-C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/24/2025 16:53:24 PAGE 3   
+C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/30/2025 15:37:50 PAGE 3   
 
  115           *
  116           * @return  void
@@ -161,7 +161,7 @@ line level    source
  145           *
  146           * @return  void
  147          **/
- 148          void    sync_ctrl( void )
+ 148          void sync_ctrl( void )
  149          {
  150   1          if( ac_dc.sync_flag == 1 )
  151   1          {
@@ -182,94 +182,105 @@ line level    source
  166   1      }
  167          
  168          /**
- 169           * @brief       模式控制函数 
+ 169           * @brief 温度扫描，DHT11温湿度扫描 1s/次 控制220V输出使能
  170           *
- 171           * @param   
- 172           *
- 173           * @return  void
- 174          **/
- 175          void mode_ctrl( uint8_t mode_num )
- 176          {
-C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/24/2025 16:53:24 PAGE 4   
+ 171           * @param[in] 
+ 172           * 
+ 173           * @return  
+ 174           * 
+ 175          **/
+ 176          void temp_scan( void )
+C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/30/2025 15:37:50 PAGE 4   
 
- 177   1          switch (mode_num)
- 178   1          {
- 179   2              case 1:
- 180   2                  ac_220v_crl(30);
- 181   2                  fan_ctrl(3);
- 182   2      
- 183   2                  eeprom.ac220_level = 30;
- 184   2                  eeprom.pwm_info = 3;
- 185   2                  eeprom_data_record();
- 186   2      
- 187   2                  break;
- 188   2      
- 189   2              case 2:
- 190   2                  ac_220v_crl(50);
- 191   2                  fan_ctrl(4);
- 192   2      
- 193   2                  eeprom.ac220_level = 50;
- 194   2                  eeprom.pwm_info = 4;
- 195   2                  eeprom_data_record();
- 196   2      
- 197   2                  break;
- 198   2      
- 199   2              case 3:
- 200   2                  ac_220v_crl(80);
- 201   2                  fan_ctrl(6);
- 202   2      
- 203   2                  eeprom.ac220_level = 80;
- 204   2                  eeprom.pwm_info = 6;
- 205   2                  eeprom_data_record();
- 206   2      
- 207   2                  break;
- 208   2      
- 209   2              default:
- 210   2                  break;
- 211   2          }
- 212   1      }
- 213          
- 214          /**
- 215           * @brief 温度扫描，1s/次 控制220V输出使能
- 216           *
- 217           * @param[in] 
- 218           * 
- 219           * @return  
- 220           * 
- 221          **/
- 222          void temp_scan( void )
- 223          {
- 224   1          if( temp.temp_scan_flag == 1)
- 225   1          {
- 226   2              temp.temp_value1 =  get_temp(NTC_1);
- 227   2              // temp.temp_value2 =  get_temp(NTC_2);
- 228   2              // temp.temp_value3 =  get_temp(NTC_3);
- 229   2              Read_DHT11();
- 230   2      
- 231   2              if( temp.temp_value1 >= temp.temp_alarm_value )  
- 232   2              {
- 233   3                  ac_dc.ac220_out1_temp_allow = 0;     
- 234   3                  ac_dc.ac220_out2_temp_allow = 0;
- 235   3                  ac_dc.ac220_out3_temp_allow = 0;  
- 236   3      
- 237   3              }else
- 238   2              {
-C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/24/2025 16:53:24 PAGE 5   
+ 177          {
+ 178   1          if( temp.temp_scan_flag == 1)
+ 179   1          {
+ 180   2              temp.temp_value1 =  get_temp(NTC);
+ 181   2      
+ 182   2              Read_DHT11();
+ 183   2      
+ 184   2              if( temp.temp_value1 >= temp.temp_alarm_value )  
+ 185   2              {
+ 186   3                  ac_dc.ac220_out_temp_allow = 0;     
+ 187   3              }else
+ 188   2              {
+ 189   3                  ac_dc.ac220_out_temp_allow = 1;     
+ 190   3              }
+ 191   2      
+ 192   2              temp.temp_scan_flag = 0;
+ 193   2          }
+ 194   1      }
+ 195          
+ 196          /**
+ 197           * @brief 用电量累计扫描 三路全开满功率1min记录一次
+ 198           *
+ 199           * @param[in] 
+ 200           * 
+ 201           * @return  
+ 202           * 
+ 203          **/
+ 204          void Power_consumption_scan( void )
+ 205          {
+ 206   1          if( gonglv.gonglv_record_flag == 1 )
+ 207   1          {
+ 208   2              eeprom_data_record(); 
+ 209   2              gonglv.gonglv_record_flag = 0;
+ 210   2          }
+ 211   1      }
+ 212          
+ 213          /**
+ 214           * @brief       模式控制函数 
+ 215           *
+ 216           * @param   
+ 217           *
+ 218           * @return  void
+ 219          **/
+ 220          void mode_ctrl( uint8_t mode_num )
+ 221          {
+ 222   1          switch (mode_num)
+ 223   1          {
+ 224   2              case 1:
+ 225   2                  ac_220v_crl(30);
+ 226   2                  fan_ctrl(3);
+ 227   2      
+ 228   2                  eeprom.ac220_level = 30;
+ 229   2                  eeprom.pwm_info = 3;
+ 230   2                  eeprom_data_record();
+ 231   2      
+ 232   2                  break;
+ 233   2      
+ 234   2              case 2:
+ 235   2                  ac_220v_crl(50);
+ 236   2                  fan_ctrl(4);
+ 237   2      
+ 238   2                  eeprom.ac220_level = 50;
+C51 COMPILER V9.60.7.0   POWER_CRL                                                         04/30/2025 15:37:50 PAGE 5   
 
- 239   3                  ac_dc.ac220_out1_temp_allow = 1;     
- 240   3                  ac_dc.ac220_out2_temp_allow = 1;
- 241   3                  ac_dc.ac220_out3_temp_allow = 1; 
- 242   3              }
+ 239   2                  eeprom.pwm_info = 4;
+ 240   2                  eeprom_data_record();
+ 241   2      
+ 242   2                  break;
  243   2      
- 244   2              temp.temp_scan_flag = 0;
- 245   2          }
- 246   1      }
+ 244   2              case 3:
+ 245   2                  ac_220v_crl(80);
+ 246   2                  fan_ctrl(6);
+ 247   2      
+ 248   2                  eeprom.ac220_level = 80;
+ 249   2                  eeprom.pwm_info = 6;
+ 250   2                  eeprom_data_record();
+ 251   2      
+ 252   2                  break;
+ 253   2      
+ 254   2              default:
+ 255   2                  break;
+ 256   2          }
+ 257   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    397    ----
+   CODE SIZE        =    407    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =     19    ----
+   XDATA SIZE       =     17    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

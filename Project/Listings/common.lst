@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   COMMON                                                            04/24/2025 16:53:25 PAGE 1   
+C51 COMPILER V9.60.7.0   COMMON                                                            04/30/2025 15:37:50 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE COMMON
@@ -45,64 +45,67 @@ line level    source
   34   3                  temp_scan_cnt = 0;
   35   3              }
   36   2          }
-  37   1          /*3, 耗电计时*/
-  38   1          if( ac_dc.ac220_flag == 1) 
-  39   1          {
-  40   2              ac220_flag_cnt++;
-  41   2              if( ac220_flag_cnt == 500 )
-  42   2              {
-  43   3                  ac220_flag_cnt = 0;
-  44   3                  ac_dc.ac220_flag = 0;
-  45   3              }
-  46   2          }
-  47   1      
-  48   1          /*4, 耗电计时*/
-  49   1          if( ac_dc.ac220_flag == 1) 
-  50   1          {
-  51   2              if(( ac_dc.ac220_out1_enable == 1 ) && (ac_dc.ac220_out1_temp_allow == 1))
-  52   2              {
-  53   3                  channel1_cnt++;
-C51 COMPILER V9.60.7.0   COMMON                                                            04/24/2025 16:53:25 PAGE 2   
+  37   1          
+  38   1          /*3, 检测220V是否接入 5s关一次耗电计时，检测到220v输入再次开启计时*/
+  39   1          if( ac_dc.ac220_flag == 1 ) 
+  40   1          {
+  41   2              ac220_flag_cnt++;
+  42   2              if( ac220_flag_cnt == 500 )
+  43   2              {
+  44   3                  ac220_flag_cnt = 0;
+  45   3                  ac_dc.ac220_flag = 0;
+  46   3              }
+  47   2          }
+  48   1      
+  49   1          /*4, 耗电计时*/
+  50   1          if( ac_dc.ac220_flag == 1) 
+  51   1          {
+  52   2              if(( ac_dc.ac220_out1_enable == 1 ) && (ac_dc.ac220_out_temp_allow == 1))
+  53   2              {
+C51 COMPILER V9.60.7.0   COMMON                                                            04/30/2025 15:37:50 PAGE 2   
 
-  54   3              }
-  55   2              if(( ac_dc.ac220_out2_enable == 1 ) && (ac_dc.ac220_out2_temp_allow == 1))
-  56   2              {
-  57   3                  channel2_cnt++;
-  58   3              }
-  59   2              if(( ac_dc.ac220_out3_enable == 1 ) && (ac_dc.ac220_out3_temp_allow == 1))
-  60   2              {
-  61   3                  channel3_cnt++;
-  62   3              }
-  63   2          }
-  64   1          
-  65   1          gonglv_time = (channel1_cnt + channel2_cnt + channel3_cnt) * eeprom.ac220_level;
-  66   1      
-  67   1          if( gonglv_time >= 30000 )  //1s
-  68   1          {
-  69   2              gonglv.gonglv_s ++;
-  70   2              gonglv_time = 0;
-  71   2              channel1_cnt = channel2_cnt = channel3_cnt = 0;
-  72   2      
-  73   2              if( gonglv.gonglv_s == 60 )   //1min
-  74   2              {
-  75   3                  gonglv.gonglv_min++;
-  76   3                  gonglv.gonglv_s = 0;
-  77   3                  eeprom.gonglv_min = gonglv.gonglv_min;
-  78   3                  gonglv.gonglv_memory_flag = 1;
-  79   3                  if( gonglv.gonglv_min == 60 )    //1h
-  80   3                  {
-  81   4                      gonglv.gonglv_h++;
-  82   4                      eeprom.gonglv_h_H = (gonglv.gonglv_h >> 8);
-  83   4                      eeprom.gonglv_h_L = gonglv.gonglv_h;
-  84   4                      gonglv.gonglv_min = 0;
-  85   4                  }
-  86   3              }
-  87   2          }
-  88   1      }
+  54   3                  channel1_cnt++;
+  55   3              }
+  56   2              if(( ac_dc.ac220_out2_enable == 1 ) && (ac_dc.ac220_out_temp_allow == 1))
+  57   2              {
+  58   3                  channel2_cnt++;
+  59   3              }
+  60   2              if(( ac_dc.ac220_out3_enable == 1 ) && (ac_dc.ac220_out_temp_allow == 1))
+  61   2              {
+  62   3                  channel3_cnt++;
+  63   3              }
+  64   2          }
+  65   1          
+  66   1          gonglv_time = (channel1_cnt + channel2_cnt + channel3_cnt) * eeprom.ac220_level;
+  67   1      
+  68   1          if( gonglv_time >= 30000 )  //1s
+  69   1          {
+  70   2              gonglv.gonglv_s ++;
+  71   2              gonglv_time = 0;
+  72   2              channel1_cnt = channel2_cnt = channel3_cnt = 0;
+  73   2      
+  74   2              if( gonglv.gonglv_s == 60 )   //1min
+  75   2              {
+  76   3                  gonglv.gonglv_min++;
+  77   3                  gonglv.gonglv_s = 0;
+  78   3      
+  79   3                  eeprom.gonglv_min = gonglv.gonglv_min;  //三路全开满功率1min记录一次
+  80   3                  gonglv.gonglv_record_flag = 1;
+  81   3      
+  82   3                  if( gonglv.gonglv_min == 60 )    //1h
+  83   3                  {
+  84   4                      gonglv.gonglv_h++;
+  85   4                      eeprom.gonglv_h_H = (gonglv.gonglv_h >> 8);
+  86   4                      eeprom.gonglv_h_L = gonglv.gonglv_h;
+  87   4                      gonglv.gonglv_min = 0;
+  88   4                  }
+  89   3              }
+  90   2          }
+  91   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    358    ----
+   CODE SIZE        =    356    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =      9    ----
    PDATA SIZE       =   ----    ----

@@ -13,23 +13,26 @@ void main( void )
     ADC_Init();
 
     /*  485控制  */
-    Uart4_Init();
-    Uart4_Send_Statu_Init();
-    Timer0_Init();
+    Uart4_Init();               //串口4用作485
+    Uart4_Send_Statu_Init();    //接收发送初始化
+    Timer0_Init();              //不定长数据接收
 
     /*  PWM控制  */
     PWM_Init();
 
-    /*  4路220输出控制  */
+    /*  3路220输出控制  */
     Power_Statu_Init();
-    power_time_Init();
-    Timer3_Init();
     INT0_Init();
     Timer1_Init();
 
-    EA = 1;
+    /*  定时事件  */
+    Timer3_Init();
 
-    eeprom_statu_judge();
+    Power_consumption_Init();
+
+    EA = 1;     //中断总开关
+
+    eeprom_statu_judge();       //EEPROM初始化
 
     printf("========== code start ========== \r\n");
 
@@ -38,10 +41,6 @@ void main( void )
         Modbus_Event();
         temp_scan();
         sync_ctrl();  
-        if(gonglv.gonglv_memory_flag == 1)
-        {
-            eeprom_data_record(); 
-            gonglv.gonglv_memory_flag = 0;
-        }
+        Power_consumption_scan();
     }  
 }

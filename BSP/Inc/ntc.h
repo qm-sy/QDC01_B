@@ -6,10 +6,7 @@
 #include "power_crl.h"
 #include "stdio.h"
 
-#define NTC_1        4
-#define NTC_2        5
-#define NTC_3        6
-#define NTC_4        7
+#define NTC        4
 
 typedef struct 
 {

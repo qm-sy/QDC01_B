@@ -1,9 +1,9 @@
 #include "communication.h"
 
 RS485 rs485;
+
 uint8_t TX1_busy_Flag = 0;
-uint8_t cnt1 = 0;
-uint8_t cnt2 = 0;
+
 /**
  * @brief	串口4调用结构体 rs485 初始化
  *
