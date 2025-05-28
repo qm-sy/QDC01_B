@@ -20,7 +20,7 @@ void eeprom_statu_judge( void )
         eeprom.pwm_info          = 0x03;          // 0000 0011  pwm默认开，3档风速
         eeprom.led_info          = 0x01;          // 0000 0001  led默认开
         eeprom.ac220_switch      = 0x07;          // 0000 0111  220V输出默认三路使能
-        eeprom.ac220_level       = 0x32;          // 50         220V输出50%功率
+        eeprom.ac220_level       = 0x28;          // 50         220V输出50%功率
         eeprom.sync_info         = 0x00;          // 0000 0000  同步模式默认关闭
         eeprom.mode_info         = 0x02;          // 0000 0010  工作模式默认普通
         eeprom.temp_alarm_value  = 0x50;          // NTC1 alarm value 默认80℃

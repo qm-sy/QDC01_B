@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        04/30/2025 15:37:50 PAGE 1   
+C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        05/08/2025 15:37:02 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MODBUS_RTU
@@ -62,7 +62,7 @@ line level    source
   51   5      
   52   5                          default:
   53   5                              break;
-C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        04/30/2025 15:37:50 PAGE 2   
+C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        05/08/2025 15:37:02 PAGE 2   
 
   54   5                      }
   55   4                  }
@@ -126,7 +126,7 @@ line level    source
  112   3      
  113   3                  /*  40005 工作模式查询                     */
  114   3                  case 0x04:   
-C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        04/30/2025 15:37:50 PAGE 3   
+C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        05/08/2025 15:37:02 PAGE 3   
 
  115   3                      modbus.byte_info_L = ac_dc.mode_info;
  116   3                      modbus.byte_info_H = 0X00;                    
@@ -190,7 +190,7 @@ line level    source
  174   3                  /*  30003 环境温湿度查询                   */
  175   3                  case 0x02:
  176   3                      modbus.byte_info_H = temp.dht11_humidity;           
-C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        04/30/2025 15:37:50 PAGE 4   
+C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        05/08/2025 15:37:02 PAGE 4   
 
  177   3                      modbus.byte_info_L = temp.dht11_temp;          
  178   3      
@@ -254,7 +254,7 @@ line level    source
  236   2      
  237   2                  break;
  238   2      
-C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        04/30/2025 15:37:50 PAGE 5   
+C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        05/08/2025 15:37:02 PAGE 5   
 
  239   2              /*  40003 三路220V输出使能设置                          */
  240   2              case 0x02:                                         
@@ -318,7 +318,7 @@ line level    source
  298   1          modbus.start_addr = rs485.RX4_buf[2]<<8 | rs485.RX4_buf[3];
  299   1      
  300   1          
-C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        04/30/2025 15:37:50 PAGE 6   
+C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        05/08/2025 15:37:02 PAGE 6   
 
  301   1          for( i = modbus.start_addr; i < modbus.start_addr + modbus.byte_cnt/2; i++)
  302   1          {
@@ -382,7 +382,7 @@ line level    source
  360   3      
  361   3                      eeprom.temp_alarm_value = modbus.byte_info_L;
  362   3                      
-C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        04/30/2025 15:37:50 PAGE 7   
+C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        05/08/2025 15:37:02 PAGE 7   
 
  363   3                      break;
  364   3                      
@@ -446,7 +446,7 @@ line level    source
  422   2                  rs485.TX4_buf[7] = crc;                 //CRC H
  423   2                  rs485.TX4_buf[6] = crc>>8;              //CRC L
  424   2              
-C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        04/30/2025 15:37:50 PAGE 8   
+C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        05/08/2025 15:37:02 PAGE 8   
 
  425   2                  rs485.TX4_send_bytelength = length;
  426   2                  
@@ -510,7 +510,7 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    CODE SIZE        =   1577    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =      7      12
-C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        04/30/2025 15:37:50 PAGE 9   
+C51 COMPILER V9.60.7.0   MODBUS_RTU                                                        05/08/2025 15:37:02 PAGE 9   
 
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
